@@ -12,3 +12,7 @@ python -m torch.distributed.launch --nproc_per_node=4 01-ddp_byol.py --config co
 
 
 We are now cleaning the code and try to upload the checkpoints (qwq poor network)
+
+
+We find that different fMRI preprocessing steps might also lead to performance fluctuations. 
+We would provide a way for you to fine-tune using your own data using LORA or just fine-tuning the whole model.
