@@ -1,0 +1,1 @@
+data:[pd] 	 seed:[42] 	 acc: 0.8500  sen: 0.8182 spe: 0.8889 
