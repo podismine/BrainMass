@@ -1,0 +1,35 @@
+network:
+  mm: byol+clf+mse
+  feature_dim: 1024
+  depth: 16
+  heads: 10
+  dim_feedforward: 2048
+  clf_mask: 10
+  mse_mask: 5
+  roi_num: 100
+
+saving:
+  log_dir: logs/log_test
+  checkpoint_dir: checkpoints/checkpoints_test
+  n_epochs: 100
+
+trainer:
+  batch_size: 4
+  m: 0.996 # momentum update
+  max_epochs: 3000
+  num_workers: 8
+  acc_lambda: 0.1
+  mse_lambda: 2
+  warmup_epochs: 10
+
+optimizer:
+  lr: 0.0003
+  weight_decay: 0.00005
+
+data:
+  path: /path/to/timseries
+  csv: /path/to/pretrain/data.csv
+  mask_way: mask_per
+  time_mask: 20
+  time_len: 30
+  
