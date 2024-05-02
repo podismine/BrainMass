@@ -7,7 +7,7 @@ We currently upload the training code. This code can also be trained for a singl
 
 you can run the code like:
 ```shell
-python -m torch.distributed.launch --nproc_per_node=4 01-ddp_byol.py --config config/normal_sch1.yaml
+python -m torch.distributed.launch --nproc_per_node=8 01-ddp_byol.py --config config/normal_sch1.yaml
 ```
 
 
