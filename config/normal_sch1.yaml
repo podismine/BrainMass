@@ -14,9 +14,9 @@ saving:
   n_epochs: 100
 
 trainer:
-  batch_size: 4
+  batch_size: 64
   m: 0.996 # momentum update
-  max_epochs: 3000
+  max_epochs: 2000
   num_workers: 8
   acc_lambda: 0.1
   mse_lambda: 2
