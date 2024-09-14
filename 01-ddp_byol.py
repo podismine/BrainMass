@@ -127,7 +127,7 @@ def main():
     # for test
     #for epoch_counter in range(1):
     for epoch_counter in range(config['trainer']['max_epochs']):
-        epoch_counter = epoch_counter + epoch_from
+        epoch_counter = epoch_counter #+ epoch_from
         model.train()
         if FLAGS.use_ddp is True:
             train_loader.sampler.set_epoch(epoch_counter)
