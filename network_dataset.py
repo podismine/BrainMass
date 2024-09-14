@@ -5,10 +5,9 @@ import numpy as np
 import nibabel as nib
 import random
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 import warnings
 from nilearn.connectome import ConnectivityMeasure
-from sklearn.utils  import shuffle
 
 warnings.filterwarnings("ignore")
 
@@ -32,7 +31,7 @@ class RandomMaskingGenerator:
             np.ones(self.num_mask),
         ])
         np.random.shuffle(mask)
-        return mask # [196]
+        return mask
 
 def mask_timeseries(timeser, mask = 30):
     rnd = np.random.random()
@@ -43,6 +42,7 @@ def mask_timeseries(timeser, mask = 30):
     bool_mask = bool_mask.astype(bool)
 
     return timeser[:,~bool_mask]
+    
 def mask_timeseries_per(timeser, mask = 30):
     rnd = np.random.random()
 
@@ -100,10 +100,10 @@ class Task1Data(data.Dataset):
     def __len__(self):
         return len(self.names)
         
-class Task3Data(data.Dataset):
+class Task2Data(data.Dataset):
 
     def __init__(self, root= None, csv = None, mask_way='mask',mask_len=10, time_len=30,shuffle_seed=42,is_train = True, is_test = False):
-        self.template = 'sch'
+        # self.template = 'sch'
         self.is_test = is_test
         self.is_train = is_train
         self.root = root
@@ -114,7 +114,7 @@ class Task3Data(data.Dataset):
 
         self.df = pd.read_csv(csv)
 
-        self.names = list(self.df['new_name'])
+        self.names = list(self.df['file'])
         test_length = int(len(self.df) * 0.15)
 
         all_data = np.array(self.names)
@@ -153,7 +153,7 @@ class Task3Data(data.Dataset):
     def __getitem__(self,index):
         name = self.imgs[index]
         lbl = self.lbls[index]
-        img = np.load(os.path.join(self.root, f"{self.template}_{name}.npy"))
+        img = np.load(os.path.join(self.root, f"{name}.npy"))
         if self.is_train is True:
             if self.mask_way == 'mask':
                 slices = [mask_timeseries(img,self.mask_len).T]

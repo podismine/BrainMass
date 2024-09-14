@@ -1,10 +1,11 @@
+import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.distributed as dist
 from utils import BNTF, MLPHead, get_sinusoid_encoding_table
 
-import torch.distributed as dist
-import random
+
 def accuracy(output,target,top_k=(1,)):
     """Computes the precision@k for the specified values of k"""
     max_k = max(top_k)
@@ -19,6 +20,7 @@ def accuracy(output,target,top_k=(1,)):
         correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
         res.append(correct_k.mul_(100.0 / batch_size).item())
     return res
+
 class BYOLTrainer(nn.Module):
     def __init__(self,depth,heads,m,feature_dim,dim_feedforward,mm,clf_mask=10, mse_mask=5):
         super().__init__()
@@ -258,6 +260,7 @@ class BYOLTrainer(nn.Module):
             loss += self.contrastive_loss(predictions_from_view_2, targets_to_view_2)
 
             return loss.mean(),acc,nce,mse
+
     def contrastive_loss(self, q, k):
         # normalize
         q = nn.functional.normalize(q, dim=1)
@@ -298,6 +301,7 @@ class BYOLTrainer(nn.Module):
                     'online_network_state_dict': self.online_network.state_dict(),
                     'target_network_state_dict': self.target_network.state_dict(),
                 }, path)
+                
 @torch.no_grad()
 def concat_all_gather(tensor):
     """

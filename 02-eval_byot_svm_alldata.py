@@ -1,6 +1,5 @@
-from network_dataset import Task3Data
+from network_dataset import Task2Data
 import torch
-import sys
 import yaml
 import numpy as np
 import os
@@ -8,14 +7,9 @@ from sklearn import preprocessing
 from torch.utils.data.dataloader import DataLoader
 from utils import BNTF, MLPHead
 import random
-import torch.nn as nn
 import argparse
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC 
-import xgboost as xgb
-import math
 import torch
-import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 from utils import get_data
 
@@ -51,9 +45,9 @@ mask_way=config['data']['mask_way']
 mask_len=int(config['data']['time_mask'])
 time_len=int(config['data']['time_len'])
 
-train_dataset = Task3Data(root, args.csv, mask_way,mask_len,time_len,shuffle_seed=shuffle_seed,is_train=True,is_test=False)
-val_dataset = Task3Data(root, args.csv,mask_way,mask_len,time_len,shuffle_seed=shuffle_seed,is_train=False,is_test=False)
-test_dataset = Task3Data(root, args.csv,mask_way,mask_len,time_len,shuffle_seed=shuffle_seed,is_train=False,is_test=True)
+train_dataset = Task2Data(root, args.csv, mask_way,mask_len,time_len,shuffle_seed=shuffle_seed,is_train=True,is_test=False)
+val_dataset = Task2Data(root, args.csv,mask_way,mask_len,time_len,shuffle_seed=shuffle_seed,is_train=False,is_test=False)
+test_dataset = Task2Data(root, args.csv,mask_way,mask_len,time_len,shuffle_seed=shuffle_seed,is_train=False,is_test=True)
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size,
                           num_workers=4, drop_last=False, shuffle=True)
@@ -99,17 +93,16 @@ def get_features_from_encoder(encoder, loader,times = 1):
                 y_train.extend(y.detach())
     x_train = torch.stack(x_train).detach().cpu()
     y_train = torch.stack(y_train).detach().cpu()
-    return x_train, y_train, x_train, x_train
+    return x_train, y_train
 
 encoder.eval()
 clf = SVC(probability=True) # 5
 
-x_train, y_train,x_train_feas,_ = get_features_from_encoder(encoder, train_loader,1)
-x_val, y_val,x_val_feas,_ = get_features_from_encoder(encoder, val_loader,1) 
-x_test, y_test,x_test_feas,atten_weights = get_features_from_encoder(encoder, test_loader,1)
+x_train, y_train = get_features_from_encoder(encoder, train_loader,1)
+x_val, y_val = get_features_from_encoder(encoder, val_loader,1) 
+x_test, y_test = get_features_from_encoder(encoder, test_loader,1)
 print("Loading features loaded.")
 
-atten_weights = atten_weights.numpy()
 x_train = x_train.detach().cpu().numpy()
 x_val = x_val.detach().cpu().numpy()
 x_test = x_test.detach().cpu().numpy()

@@ -31,7 +31,7 @@ from torch.nn import TransformerEncoderLayer
 
 def get_data(args):
     if args.data == 'abide1':
-        args.csv = "down_stream/train.csv"
+        args.csv = "down_stream/abide1.csv"
     elif args.data == 'adhd':
         args.csv = "down_stream/adhd.csv"
     elif args.data == 'oas':
@@ -69,13 +69,11 @@ class BNTF(nn.Module):
 
         self.attention_list = nn.ModuleList()
         self.node_num = 100
-        #for _ in range(12):
         for _ in range(int(depth)):
             self.attention_list.append(
                 TransformerEncoderLayer(d_model=self.node_num, nhead=int(heads), dim_feedforward=dim_feedforward, 
                                         batch_first=True)
             )
-            # head=10
         self.dim_reduction = nn.Sequential(
             nn.Linear(self.node_num, 8),
             nn.LeakyReLU()
@@ -83,8 +81,6 @@ class BNTF(nn.Module):
 
         final_dim = 8 * self.node_num
 
-        #self.g = nn.Sequential(nn.Linear(final_dim, feature_dim),nn.BatchNorm1d(feature_dim))
-        #self.g = nn.Sequential(nn.Linear(final_dim, feature_dim))
         self.g = MLPHead(final_dim, final_dim * 2, feature_dim)
         
     def forward(self,img,forward_with_mlp=True):

@@ -1,8 +1,6 @@
 import torch
-import torch.nn as nn
 import yaml
 from network_dataset import Task1Data
-from utils import MLPHead, BNTF
 import os
 import time
 from torch.utils.tensorboard import SummaryWriter
@@ -11,7 +9,6 @@ import torch.nn.functional as F
 import torch.distributed as dist
 import argparse
 from byol_trainer import BYOLTrainer
-import utils
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import  DistributedSampler
 
@@ -19,6 +16,7 @@ from timm.utils import NativeScaler
 
 import random
 import numpy as np
+
 seed = 42
 random.seed(seed)
 os.environ['PYTHONHASHSEED'] = str(seed)
@@ -35,6 +33,7 @@ def get_parse():
     parser.add_argument("--no_ddp", action = "store_true",default = False)
     parser.add_argument("--resume", action = "store_true",default = False)
     parser.add_argument("--config", type=str,default = "")
+    parser.add_argument("--model_path", type=str,default = "")
     parser.add_argument("--use_ddp",type=bool)
     parser.add_argument("--local-rank", default=-1)
 
@@ -86,7 +85,6 @@ def main():
     mm = str(config['network']['mm'])
     clf_mask = int(config['network']['clf_mask'])
     mse_mask = int(config['network']['mse_mask'])
-    #model = BYOLTrainer(config['trainer']['m'],feature_size,depth,heads,dim_feedforward)
     model = BYOLTrainer(depth,heads,config['trainer']['m'],feature_size,dim_feedforward,mm=mm, clf_mask = clf_mask, mse_mask = mse_mask)
     model.cuda().train()
 
@@ -97,13 +95,8 @@ def main():
     log_dir = config['saving']['log_dir']
 
     if FLAGS.resume is True:
-        epochs = [f for f in os.listdir(model_checkpoints_folder) if f.startswith("model")]
-        epoch_num = [int(f.split("_")[-1][:-4]) for f in epochs ]
-        last_epoch = max(epoch_num)
-        checkpoint_dir = epochs[epoch_num.index(last_epoch)]
-        checkpoint = torch.load(os.path.join(model_checkpoints_folder, checkpoint_dir), map_location = 'cpu')
+        checkpoint = torch.load(FLAGS.model_path, map_location = 'cpu')
         model.load_state_dict(checkpoint['model'])
-        log_dir = log_dir + f'resume_from_{last_epoch}'
 
     if FLAGS.use_ddp is True:
         model = DDP(model, find_unused_parameters=True)
@@ -130,10 +123,6 @@ def main():
     acc_lambda = float(config['trainer']['acc_lambda'])
     mse_lambda = float(config['trainer']['mse_lambda'])
     warmup_epochs = int(config['trainer']['warmup_epochs'])
-    if FLAGS.resume is not True:
-        epoch_from = 0
-    else:
-        epoch_from = last_epoch
 
     # for test
     #for epoch_counter in range(1):
